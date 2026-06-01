@@ -1,0 +1,311 @@
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Kleuren ── */
+:root {
+  --roze:        #f9c6c6;
+  --paars:       #c5bef8;
+  --wit:         #ffffff;
+  --tekst:       #222222;
+  --tekst-licht: #666666;
+  --groen:       #4cd964;
+  --rood-nav:    #e05a5a;
+  --rand:        rgba(0,0,0,0.10);
+  --nav-hoogte:  64px;
+}
+
+/* ── Body ── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--roze);
+  color: var(--tekst);
+  min-height: 100vh;
+  padding-bottom: calc(var(--nav-hoogte) + 16px);
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 52px 20px 16px;
+}
+
+.header-titel { font-size: 1.1rem; font-weight: 600; }
+
+.menu-knop {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--tekst);
+}
+
+/* ── Main ── */
+main { padding: 0 20px; }
+
+/* ── Welkom ── */
+.welkom { font-size: 1.8rem; font-weight: 700; margin-bottom: 24px; }
+
+/* ── Sectie label ── */
+.sectie-label {
+  font-size: 0.75rem;
+  color: var(--tekst-licht);
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+/* ── Rij kaart (voor tellers en toggles) ── */
+.rij-kaart {
+  background: rgba(255,255,255,0.5);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* ── Teller knoppen ── */
+.teller-knoppen { display: flex; }
+
+.teller-knoppen button {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid #ccc;
+  background: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--tekst);
+  transition: background 0.15s;
+}
+
+.teller-knoppen button:first-child { border-radius: 10px 0 0 10px; }
+.teller-knoppen button:last-child  { border-radius: 0 10px 10px 0; border-left: none; }
+.teller-knoppen button:hover       { background: #f0f0f0; }
+
+/* ── Toggle switch ── */
+.toggle { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 26px;
+  background: #ccc;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle input:checked + .slider           { background: var(--groen); }
+.toggle input:checked + .slider::before  { transform: translateX(22px); }
+
+/* ── Formulier (invoer.html) ── */
+.form-groep { margin-bottom: 14px; }
+
+.form-groep label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--tekst-licht);
+  margin-bottom: 5px;
+}
+
+.form-groep input,
+.form-groep select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--rand);
+  background: white;
+  font-size: 0.95rem;
+  color: var(--tekst);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-groep input:focus,
+.form-groep select:focus {
+  outline: none;
+  border-color: var(--groen);
+}
+
+.tip-kaart {
+  background: rgba(255,255,255,0.5);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 8px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.opslaan-knop {
+  width: 100%;
+  padding: 14px;
+  background: var(--groen);
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.opslaan-knop:hover { background: #3ab854; }
+
+.succes-melding {
+  text-align: center;
+  color: #27ae60;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  min-height: 1.4em;
+}
+
+/* ── Overzicht (overzicht.html) ── */
+.overzicht-kaart-paars {
+  background: var(--paars);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.periode-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+
+.periode-tab {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(255,255,255,0.35);
+  color: #333;
+  transition: background 0.15s;
+}
+
+.periode-tab.actief { background: white; color: #222; }
+
+.grafiek-wrap { height: 60px; margin-bottom: 8px; }
+.grafiek-wrap svg { width: 100%; height: 100%; }
+
+.overzicht-grafiek-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stappen-kaart {
+  background: var(--paars);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stappen-label { font-size: 0.8rem; color: #444; margin-bottom: 4px; }
+.stappen-waarde { font-size: 1.1rem; font-weight: 700; color: #222; }
+
+/* ── Item lijst (overzicht.html) ── */
+.item-lijst { list-style: none; }
+
+.item-rij {
+  background: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-icoon { font-size: 1.3rem; flex-shrink: 0; }
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-naam {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-meta { font-size: 0.75rem; color: var(--tekst-licht); }
+
+.verwijder-knop {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.verwijder-knop:hover { color: #e74c3c; }
+
+.leeg {
+  text-align: center;
+  color: var(--tekst-licht);
+  padding: 32px 0;
+}
+
+.leeg a { color: var(--groen); text-decoration: none; font-weight: 600; }
+
+/* ── Navigatie ── */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-hoogte);
+  background: white;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  z-index: 100;
+}
+
+nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  font-size: 0.68rem;
+  color: #999;
+  font-weight: 500;
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+nav a:last-child { border-right: none; }
+
+nav a.actief { color: var(--rood-nav); font-weight: 700; }
+
+nav a span { font-size: 1.2rem; line-height: 1; }
