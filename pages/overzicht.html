@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overzicht — Gezond Leven Tracker</title>
+  <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+
+  <header>
+    <span class="header-titel">Overzicht</span>
+    <button class="menu-knop">☰</button>
+  </header>
+
+  <main>
+
+    <!-- Paarse kaart met grafiek -->
+    <div class="overzicht-kaart-paars">
+      <div class="periode-tabs">
+        <button class="periode-tab actief" data-periode="dag">DAG</button>
+        <button class="periode-tab" data-periode="week">Week</button>
+      </div>
+
+      <!-- Simpele SVG grafiek -->
+      <div class="grafiek-wrap">
+        <svg viewBox="0 0 300 60" preserveAspectRatio="none">
+          <polyline
+            points="0,50 30,35 60,40 90,20 120,30 150,15 180,25 210,10 240,20 270,15 300,5"
+            fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon
+            points="0,50 30,35 60,40 90,20 120,30 150,15 180,25 210,10 240,20 270,15 300,5 300,60 0,60"
+            fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <p class="overzicht-grafiek-label">Gezondheidsoverzicht</p>
+    </div>
+
+    <!-- Stappenteller kaart -->
+    <div class="stappen-kaart">
+      <div>
+        <p class="stappen-label">Stappen teller</p>
+        <p class="stappen-waarde" id="stappen-waarde">0 stappen</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="stappen-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Lijst van items -->
+    <p class="sectie-label">Recent toegevoegd</p>
+    <ul id="overzicht-lijst" class="item-lijst"></ul>
+
+  </main>
+
+  <nav>
+    <a href="index.html">🏠<span>Home</span></a>
+    <a href="invoer.html">➕<span>Invoeren</span></a>
+    <a href="overzicht.html" class="actief">📊<span>Overzicht</span></a>
+  </nav>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
