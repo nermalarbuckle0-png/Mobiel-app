@@ -1,86 +1,44 @@
-# Mijn Gezondheid PWA 🌿
+# Gezond Leven Tracker
 
-Een Progressive Web App waarmee je dagelijks je gezondheid bijhoudt — voeding, sport, slaap, water en gewicht. Werkt ook offline en is installeerbaar op je telefoon.
+Deze app is een mobiele PWA voor gezondheidstracking met offline-functionaliteit, LocalStorage CRUD en een overzichtspagina met grafiek.
 
-Gebouwd als eindopdracht voor de module **Eenvoudige mobiele App** 
+## Belangrijkste functionaliteit
+- Dashboard met calorieënteller en dagdoelen
+- Invoerpagina om items toe te voegen met categorie, omschrijving, calorieën en maaltijd
+- Overzichtspagina met filter op dag/week/maand
+- Stappenmeter met doel, progress-balk en +/− knoppen
+- Responsive UI met hamburger drawer-menu
+- PWA met `manifest.json`, service worker en offline caching
+- Mobile-first wireframe prototypes in `pages/wireframes`
 
-## Live demo
+## Lokaal draaien
+1. Open een terminal in de projectmap
+2. Installeer dependencies (optioneel, alleen nodig voor de Express-server)
 
-🔗 [Vul hier je GitHub Pages URL in]
-
----
-
-## Wat doet de app?
-
-- **Toevoegen** — log elke dag gezondheidsgegevens met datum, categorie, omschrijving en waarde
-- **Overzicht** — bekijk je gegevens gefilterd op dag, week of maand
-- **Grafiek** — zie in één oogopslag welke categorieën je het meest gebruikt
-- **Verwijderen** — verwijder losse items via de prullenbakknop
-- **Offline** — de app werkt zonder internetverbinding dankzij een service worker
-- **Installeerbaar** — voeg de app toe aan je beginscherm via de installeerknop
-- **Taalswitch** — schakel tussen Nederlands en Engels
-
----
-
-## Projectstructuur
-
-```
-gezondheidspwa/
-├── index.html        Dashboard
-├── invoer.html       Nieuwe invoer toevoegen
-├── overzicht.html    Overzicht met filter en grafiek
-├── style.css         Mobile-first CSS
-├── app.js            JavaScript (CRUD, taalswitch, PWA-logica)
-├── sw.js             Service Worker
-├── manifest.json     PWA manifest
-├── lang/
-│   ├── nl.json       Nederlandse teksten
-│   └── en.json       Engelse teksten
-└── icons/
-    ├── icon-192.png
-    └── icon-512.png
+```powershell
+npm install
 ```
 
----
+3. Start de server:
 
-## Lokaal opstarten
-
-```bash
-git clone https://github.com/JOUWGEBRUIKERSNAAM/gezondheidspwa.git
-cd gezondheidspwa
-npx serve .
+```powershell
+npm start
 ```
 
-Open daarna `http://localhost:3000` in je browser.
+4. Open in je browser:
 
-> Niet openen via `file://` — de service worker werkt alleen over HTTP.
+- http://localhost:3000
+- http://localhost:3000/pages/wireframes/index.html
 
----
+## Testpunten
+- `index.html` werkt op mobiele en desktop resoluties
+- `invoer.html` voegt items toe en slaat ze op in LocalStorage
+- `overzicht.html` toont items, filtert per periode en visualiseert data
+- De app werkt offline via service worker
+- De PWA is installeerbaar met een manifest en icon
 
-## Technologie
-
-| Onderdeel | Technologie |
-|---|---|
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Data opslag | LocalStorage (geen server nodig) |
-| Offline | Service Worker (cache-first) |
-| Installeerbaar | Web App Manifest |
-| Vertalingen | JSON taalbestanden (nl/en) |
-| Hosting | GitHub Pages |
-
----
-
-## Vereisten checklist
-
-| # | Eis | Status |
-|---|-----|--------|
-| F1 | Dagelijks gezondheidsitems toevoegen | ✅ |
-| F2 | Overzicht per dag, week en maand | ✅ |
-| F3 | Items verwijderen | ✅ |
-| F5 | Item bevat datum, categorie, omschrijving en waarde | ✅ |
-| F6 | Data opgeslagen in LocalStorage | ✅ |
-| F7 | Installeerbaar via manifest.json | ✅ |
-| F8 | Offline gebruik via service worker | ✅ |
-| F9 | Responsive op mobiel en desktop | ✅ |
-| F10 | Semantische HTML5 structuur | ✅ |
-| F11 | Taalswitch Nederlands / Engels | ✅ |
+## Wireframes
+Wireframepagina's:
+- `pages/wireframes/index.html`
+- `pages/wireframes/invoer.html`
+- `pages/wireframes/overzicht.html`

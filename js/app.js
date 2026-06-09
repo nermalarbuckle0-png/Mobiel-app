@@ -1,6 +1,5 @@
-'use strict';
+﻿'use strict';
 
-// ── Lees en schrijf items uit localStorage ──
 function getItems() {
   return JSON.parse(localStorage.getItem('items') || '[]');
 }
@@ -9,88 +8,345 @@ function saveItems(items) {
   localStorage.setItem('items', JSON.stringify(items));
 }
 
-// ── Calorieën teller: +50 of -50 per klik ──
-function tellerAanpassen(verschil) {
-  const huidig = parseInt(localStorage.getItem('calorie') || '0');
-  const nieuw  = Math.max(0, huidig + verschil);
-  localStorage.setItem('calorie', nieuw);
-  document.getElementById('calorie-waarde').textContent = nieuw + ' kcal';
+function tellerAanpassen(diff) {
+  const current = parseInt(localStorage.getItem('calorie') || '0', 10);
+  const next = Math.max(0, current + diff);
+  localStorage.setItem('calorie', next);
+  const el = document.getElementById('calorie-waarde');
+  if (el) el.textContent = next + ' kcal';
 }
 
-// ── Item opslaan vanuit invoer.html ──
 function slaOp() {
-  const omschrijving = document.getElementById('invoer-omschrijving').value.trim();
-  if (!omschrijving) { alert('Vul een omschrijving in.'); return; }
+  const omschrijvingEl = document.getElementById('invoer-omschrijving');
+  const calorieEl = document.getElementById('invoer-calorie');
+  const omschrijving = omschrijvingEl ? omschrijvingEl.value.trim() : '';
+  if (!omschrijving) {
+    alert('Vul een omschrijving in.');
+    return;
+  }
 
   const item = {
-    id:           Date.now(),
-    datum:        new Date().toLocaleDateString('nl-NL'),
-    categorie:    document.getElementById('invoer-categorie').value,
+    id: Date.now(),
+    datum: new Date().toLocaleDateString('nl-NL'),
+    iso: new Date().toISOString(),
+    categorie: document.getElementById('invoer-categorie').value,
     omschrijving: omschrijving,
-    calorie:      document.getElementById('invoer-calorie').value,
-    maaltijd:     document.getElementById('invoer-maaltijd').value,
+    calorie: calorieEl ? calorieEl.value : '',
+    maaltijd: document.getElementById('invoer-maaltijd').value,
   };
 
   const items = getItems();
   items.unshift(item);
   saveItems(items);
 
-  // Calorieën optellen bij teller
   if (item.calorie) {
-    const huidig = parseInt(localStorage.getItem('calorie') || '0');
-    localStorage.setItem('calorie', huidig + parseInt(item.calorie));
+    const current = parseInt(localStorage.getItem('calorie') || '0', 10);
+    localStorage.setItem('calorie', current + parseInt(item.calorie, 10));
   }
 
-  // Formulier leegmaken en bevestiging tonen
-  document.getElementById('invoer-omschrijving').value = '';
-  document.getElementById('invoer-calorie').value = '';
-  document.getElementById('succes-melding').textContent = '✅ Opgeslagen!';
-  setTimeout(() => { document.getElementById('succes-melding').textContent = ''; }, 2000);
+  if (omschrijvingEl) omschrijvingEl.value = '';
+  if (calorieEl) calorieEl.value = '';
+
+  const feedback = document.getElementById('succes-melding');
+  if (feedback) {
+    feedback.textContent = '✅ Opgeslagen!';
+    setTimeout(() => { feedback.textContent = ''; }, 2000);
+  }
+
+  if (window.location.pathname.endsWith('overzicht.html')) {
+    laadOverzicht();
+    renderChart();
+  }
 }
 
-// ── Items tonen in overzicht.html ──
+function withinPeriod(itemIso, periode) {
+  if (!itemIso) return false;
+  const itemDate = new Date(itemIso);
+  const now = new Date();
+
+  if (periode === 'dag') {
+    return itemDate.toDateString() === now.toDateString();
+  }
+
+  if (periode === 'week') {
+    const start = new Date(now);
+    start.setDate(now.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+    return itemDate >= start && itemDate <= now;
+  }
+
+  if (periode === 'maand') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
+    return itemDate >= start && itemDate <= now;
+  }
+
+  return true;
+}
+
 function laadOverzicht() {
   const lijst = document.getElementById('overzicht-lijst');
   if (!lijst) return;
 
-  const items = getItems();
-  const icoon = { voeding:'🍎', sport:'🏃', slaap:'😴', water:'💧', gewicht:'⚖️' };
+  const periode = document.querySelector('.periode-tab.actief')?.dataset.periode || 'dag';
+  const items = getItems().filter(item => withinPeriod(item.iso || item.datum, periode));
 
-  lijst.innerHTML = items.length === 0
-    ? '<li class="leeg">Nog geen items — <a href="invoer.html">voeg iets toe</a>!</li>'
-    : items.slice(0, 10).map(item => `
-        <li class="item-rij">
-          <span class="item-icoon">${icoon[item.categorie] || '📝'}</span>
-          <div class="item-info">
-            <span class="item-naam">${item.omschrijving}</span>
-            <span class="item-meta">${item.datum} · ${item.maaltijd}${item.calorie ? ' · ' + item.calorie + ' kcal' : ''}</span>
-          </div>
-          <button class="verwijder-knop" onclick="verwijderItem(${item.id})">✕</button>
-        </li>
-      `).join('');
+  if (!items.length) {
+    lijst.innerHTML = '<li class="leeg">Nog geen items — <a href="invoer.html">voeg iets toe</a>!</li>';
+    return;
+  }
+
+  const icons = { voeding: '🍎', sport: '🏃', slaap: '😴', water: '💧', gewicht: '⚖️' };
+
+  lijst.innerHTML = items.slice(0, 20).map(item => {
+    const meal = item.maaltijd || '';
+    const meta = item.datum + ' · ' + meal + (item.calorie ? ' · ' + item.calorie + ' kcal' : '');
+    return `
+      <li class="item-rij">
+        <span class="item-icoon">${icons[item.categorie] || '📝'}</span>
+        <div class="item-info">
+          <span class="item-naam">${item.omschrijving}</span>
+          <span class="item-meta">${meta}</span>
+        </div>
+        <button class="verwijder-knop" onclick="verwijderItem(${item.id})">✕</button>
+      </li>`;
+  }).join('');
 }
 
 function verwijderItem(id) {
-  saveItems(getItems().filter(i => i.id !== id));
+  saveItems(getItems().filter(item => item.id !== id));
   laadOverzicht();
+  renderChart();
 }
 
-// ── Start: laad alles wat op deze pagina nodig is ──
-document.addEventListener('DOMContentLoaded', () => {
+function getGoal() {
+  return parseInt(localStorage.getItem('stappen-doel') || '10000', 10);
+}
 
-  // Calorieën teller (index.html)
-  const tellerEl = document.getElementById('calorie-waarde');
-  if (tellerEl) tellerEl.textContent = (localStorage.getItem('calorie') || '0') + ' kcal';
+function updateProgress() {
+  const current = parseInt(localStorage.getItem('stappen') || '0', 10);
+  const goal = getGoal();
+  const fill = document.getElementById('progress-fill');
+  const text = document.getElementById('progress-text');
+  const pct = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0;
 
-  // Doelen toggles (index.html)
-  document.querySelectorAll('[data-doel]').forEach(input => {
-    const naam = input.dataset.doel;
-    input.checked = localStorage.getItem('doel-' + naam) === 'true';
-    input.addEventListener('change', () => {
-      localStorage.setItem('doel-' + naam, input.checked);
+  if (fill) fill.style.width = pct + '%';
+  if (text) {
+    text.textContent = pct >= 100 ? 'Doel behaald!' : `${current} van ${goal} stappen`;
+  }
+}
+
+function renderChart() {
+  const line = document.getElementById('chart-line');
+  const fill = document.getElementById('chart-fill');
+  if (!line || !fill) return;
+
+  const periode = document.querySelector('.periode-tab.actief')?.dataset.periode || 'dag';
+  const now = new Date();
+  const items = getItems();
+  let buckets = [];
+
+  if (periode === 'dag') {
+    buckets = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }));
+    items.forEach(item => {
+      const date = new Date(item.iso || item.datum);
+      if (date.toDateString() !== now.toDateString()) return;
+      const hour = date.getHours();
+      buckets[hour].value += parseInt(item.calorie || 0, 10) || 0;
     });
+  } else if (periode === 'week') {
+    buckets = Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(now);
+      day.setDate(now.getDate() - (6 - index));
+      day.setHours(0, 0, 0, 0);
+      return { date: day, value: 0 };
+    });
+    items.forEach(item => {
+      const date = new Date(item.iso || item.datum);
+      buckets.forEach(bucket => {
+        const nextDay = new Date(bucket.date);
+        nextDay.setDate(bucket.date.getDate() + 1);
+        if (date >= bucket.date && date < nextDay) bucket.value += parseInt(item.calorie || 0, 10) || 0;
+      });
+    });
+  } else {
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    buckets = Array.from({ length: daysInMonth }, (_, index) => ({ date: new Date(now.getFullYear(), now.getMonth(), index + 1), value: 0 }));
+    items.forEach(item => {
+      const date = new Date(item.iso || item.datum);
+      buckets.forEach(bucket => {
+        const nextDay = new Date(bucket.date);
+        nextDay.setDate(bucket.date.getDate() + 1);
+        if (date >= bucket.date && date < nextDay) bucket.value += parseInt(item.calorie || 0, 10) || 0;
+      });
+    });
+  }
+
+  const values = buckets.map(bucket => bucket.value);
+  const max = Math.max(...values, 1);
+  const width = 300;
+  const height = 60;
+  const step = values.length > 1 ? width / (values.length - 1) : width;
+
+  const points = values.map((value, index) => {
+    const x = Math.round(index * step);
+    const y = Math.round(height - (value / max) * (height - 6));
+    return `${x},${y}`;
   });
 
-  // Overzicht lijst
+  line.setAttribute('points', points.join(' '));
+  fill.setAttribute('points', `${points.join(' ')} ${width},60 0,60`);
+}
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/js/sw.js').catch(() => {});
+  }
+}
+
+function setupDrawer() {
+  if (document.querySelector('.drawer')) return;
+  const drawer = document.createElement('div');
+  drawer.className = 'drawer';
+  drawer.innerHTML = `
+    <div class="drawer-panel">
+      <button class="drawer-close" aria-label="Close">✕</button>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="invoer.html">Invoeren</a>
+        <a href="overzicht.html">Overzicht</a>
+      </nav>
+    </div>`;
+  document.body.appendChild(drawer);
+  drawer.addEventListener('click', e => {
+    if (e.target === drawer || e.target.classList.contains('drawer-close')) drawer.classList.remove('open');
+  });
+  document.querySelectorAll('.menu-knop').forEach(btn => btn.addEventListener('click', () => drawer.classList.add('open')));
+}
+
+function setupGoalButtons() {
+  const goalChange = document.getElementById('goal-change');
+  const goalInputWrap = document.getElementById('goal-input-wrap');
+  const goalInput = document.getElementById('goal-input');
+  const goalSave = document.getElementById('goal-save');
+  const goalCancel = document.getElementById('goal-cancel');
+
+  if (goalChange) {
+    goalChange.addEventListener('click', () => {
+      if (!goalInputWrap) return;
+      goalInputWrap.style.display = goalInputWrap.style.display === 'flex' ? 'none' : 'flex';
+      if (goalInput) goalInput.value = localStorage.getItem('stappen-doel') || '10000';
+    });
+  }
+
+  if (goalSave) {
+    goalSave.addEventListener('click', () => {
+      if (goalInput) localStorage.setItem('stappen-doel', Math.max(0, parseInt(goalInput.value, 10) || 0));
+      if (goalInputWrap) goalInputWrap.style.display = 'none';
+      updateProgress();
+    });
+  }
+
+  if (goalCancel) {
+    goalCancel.addEventListener('click', () => {
+      if (goalInputWrap) goalInputWrap.style.display = 'none';
+    });
+  }
+}
+
+function setupPeriodTabs() {
+  document.querySelectorAll('.periode-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.periode-tab').forEach(el => el.classList.remove('actief'));
+      btn.classList.add('actief');
+      laadOverzicht();
+      renderChart();
+    });
+  });
+}
+
+function setupStepControls() {
+  const stappenEl = document.getElementById('stappen-waarde');
+  const stapPlus = document.getElementById('stappen-plus');
+  const stapMinus = document.getElementById('stappen-minus');
+  const stappenToggle = document.getElementById('stappen-toggle');
+
+  if (stappenEl) {
+    const current = parseInt(localStorage.getItem('stappen') || '0', 10);
+    stappenEl.textContent = current + ' stappen';
+  }
+
+  if (stappenToggle) {
+    stappenToggle.checked = localStorage.getItem('stappen-enabled') === 'true';
+    stappenToggle.addEventListener('change', () => {
+      localStorage.setItem('stappen-enabled', stappenToggle.checked);
+    });
+  }
+
+  function changeSteps(delta) {
+    const current = Math.max(0, parseInt(localStorage.getItem('stappen') || '0', 10) + delta);
+    localStorage.setItem('stappen', current);
+    if (stappenEl) stappenEl.textContent = current + ' stappen';
+    updateProgress();
+  }
+
+  if (stapPlus) stapPlus.addEventListener('click', () => changeSteps(100));
+  if (stapMinus) stapMinus.addEventListener('click', () => changeSteps(-100));
+}
+
+function setupToggleButtons() {
+  document.querySelectorAll('[data-doel]').forEach(input => {
+    const key = 'doel-' + input.dataset.doel;
+    input.checked = localStorage.getItem(key) === 'true';
+    input.addEventListener('change', () => {
+      localStorage.setItem(key, input.checked);
+    });
+  });
+}
+
+let deferredPrompt = null;
+
+function setupInstallButton() {
+  const installBtn = document.getElementById('install-app');
+  if (!installBtn) return;
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    installBtn.style.display = 'inline-flex';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+    return choiceResult;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+  });
+}
+
+function initPage() {
+  const calorieElement = document.getElementById('calorie-waarde');
+  if (calorieElement) {
+    const current = parseInt(localStorage.getItem('calorie') || '0', 10);
+    calorieElement.textContent = current + ' kcal';
+  }
+
+  setupDrawer();
+  setupStepControls();
+  setupGoalButtons();
+  setupToggleButtons();
+  setupPeriodTabs();
+  setupInstallButton();
+  updateProgress();
+  renderChart();
   laadOverzicht();
-});
+  registerServiceWorker();
+}
+
+document.addEventListener('DOMContentLoaded', initPage);

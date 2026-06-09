@@ -1,65 +1,73 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Overzicht — Gezond Leven Tracker</title>
   <link rel="stylesheet" href="/styles/style.css">
+  <link rel="manifest" href="/json/manifest.json">
+  <meta name="theme-color" content="#2ecc71">
 </head>
 <body>
-
   <header>
     <span class="header-titel">Overzicht</span>
-    <button class="menu-knop">☰</button>
+    <button id="install-app" class="install-knop" style="display:none;">Installeer app</button>
+    <button class="menu-knop">Menu</button>
   </header>
-
   <main>
-
-    <!-- Paarse kaart met grafiek -->
     <div class="overzicht-kaart-paars">
       <div class="periode-tabs">
         <button class="periode-tab actief" data-periode="dag">DAG</button>
         <button class="periode-tab" data-periode="week">Week</button>
+        <button class="periode-tab" data-periode="maand">Maand</button>
       </div>
-
-      <!-- Simpele SVG grafiek -->
       <div class="grafiek-wrap">
-        <svg viewBox="0 0 300 60" preserveAspectRatio="none">
-          <polyline
-            points="0,50 30,35 60,40 90,20 120,30 150,15 180,25 210,10 240,20 270,15 300,5"
-            fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
-          <polygon
-            points="0,50 30,35 60,40 90,20 120,30 150,15 180,25 210,10 240,20 270,15 300,5 300,60 0,60"
-            fill="rgba(255,255,255,0.2)"/>
+        <svg id="overview-chart" viewBox="0 0 300 60" preserveAspectRatio="none">
+          <polyline id="chart-line" points="" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon id="chart-fill" points="" fill="rgba(255,255,255,0.2)"/>
         </svg>
       </div>
       <p class="overzicht-grafiek-label">Gezondheidsoverzicht</p>
     </div>
-
-    <!-- Stappenteller kaart -->
+    <div class="doel-kaart rij-kaart">
+      <p class="doel-label">Stappen doel</p>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progress-text">0 van 10000 stappen</span>
+          <button id="goal-change" class="goal-btn">Stel doel in</button>
+        </div>
+      </div>
+      <div class="goal-input-wrap" id="goal-input-wrap" style="display:none;">
+        <input id="goal-input" class="goal-input" type="number" placeholder="bv. 10000">
+        <button id="goal-save" class="goal-btn">Opslaan</button>
+        <button id="goal-cancel" class="goal-btn">Annuleren</button>
+      </div>
+    </div>
     <div class="stappen-kaart">
       <div>
         <p class="stappen-label">Stappen teller</p>
         <p class="stappen-waarde" id="stappen-waarde">0 stappen</p>
+        <div class="stappen-controls">
+          <button class="stappen-knop" id="stappen-minus">-</button>
+          <button class="stappen-knop" id="stappen-plus">+</button>
+        </div>
       </div>
       <label class="toggle">
         <input type="checkbox" id="stappen-toggle">
         <span class="slider"></span>
       </label>
     </div>
-
-    <!-- Lijst van items -->
     <p class="sectie-label">Recent toegevoegd</p>
     <ul id="overzicht-lijst" class="item-lijst"></ul>
-
   </main>
-
   <nav>
-    <a href="index.html">🏠<span>Home</span></a>
-    <a href="invoer.html">➕<span>Invoeren</span></a>
-    <a href="overzicht.html" class="actief">📊<span>Overzicht</span></a>
+    <a href="index.html">Home</a>
+    <a href="invoer.html">Invoeren</a>
+    <a href="overzicht.html" class="actief">Overzicht</a>
   </nav>
-
   <script src="/js/app.js"></script>
 </body>
 </html>

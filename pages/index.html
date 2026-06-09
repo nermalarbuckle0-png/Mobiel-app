@@ -1,32 +1,29 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gezond Leven Tracker</title>
   <link rel="stylesheet" href="/styles/style.css">
+  <link rel="manifest" href="/json/manifest.json">
+  <meta name="theme-color" content="#2ecc71">
 </head>
 <body>
-
   <header>
     <span class="header-titel">Gezond Leven Tracker</span>
-    <button class="menu-knop">☰</button>
+    <button id="install-app" class="install-knop" style="display:none;">Installeer app</button>
+    <button class="menu-knop">Menu</button>
   </header>
-
   <main>
     <h1 class="welkom">Welkom terug</h1>
-
-    <!-- Calorieën teller -->
     <p class="sectie-label">Calorieën teller</p>
     <div class="rij-kaart">
       <span id="calorie-waarde">0 kcal</span>
       <div class="teller-knoppen">
-        <button onclick="tellerAanpassen(-50)">−</button>
+        <button onclick="tellerAanpassen(-50)">-</button>
         <button onclick="tellerAanpassen(+50)">+</button>
       </div>
     </div>
-
-    <!-- Dagelijkse doelen -->
     <p class="sectie-label">Dagelijkse doelen</p>
     <div class="rij-kaart">
       <span>Bewegen (30 min)</span>
@@ -50,13 +47,11 @@
       </label>
     </div>
   </main>
-
   <nav>
-    <a href="index.html" class="actief">🏠<span>Home</span></a>
-    <a href="invoer.html">➕<span>Invoeren</span></a>
-    <a href="overzicht.html">📊<span>Overzicht</span></a>
+    <a href="index.html" class="actief">Home</a>
+    <a href="invoer.html">Invoeren</a>
+    <a href="overzicht.html">Overzicht</a>
   </nav>
-
   <script src="/js/app.js"></script>
 </body>
 </html>

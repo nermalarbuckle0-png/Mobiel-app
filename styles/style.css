@@ -41,6 +41,31 @@ header {
   color: var(--tekst);
 }
 
+.install-knop {
+  background: var(--groen);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.install-knop:hover {
+  opacity: 0.95;
+}
+
+.lang-switch {
+  background: none;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 10px;
+  border-radius: 10px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
 /* ── Main ── */
 main { padding: 0 20px; }
 
@@ -223,6 +248,34 @@ main { padding: 0 20px; }
 
 .stappen-label { font-size: 0.8rem; color: #444; margin-bottom: 4px; }
 .stappen-waarde { font-size: 1.1rem; font-weight: 700; color: #222; }
+
+.stappen-controls { margin-top: 8px; display: flex; gap: 8px; }
+.stappen-knop {
+  width: 40px; height: 36px; border-radius: 10px; border: none; background: white; font-size: 1.2rem; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.stappen-knop:hover { transform: translateY(-1px); }
+
+/* Drawer (hamburger menu) */
+.drawer {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; z-index: 300;
+}
+.drawer.open { display: flex; }
+.drawer-panel {
+  background: white; width: 100%; max-height: 60%; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 18px; box-shadow: 0 -6px 18px rgba(0,0,0,0.12);
+}
+.drawer-panel a { display: block; padding: 12px 0; color: var(--tekst); font-weight: 600; text-decoration: none; }
+.drawer-close { position: absolute; right: 14px; top: 10px; background: none; border: none; font-size: 1.2rem; }
+
+/* Doel / progress styles */
+.doel-kaart { display: block; padding-bottom: 12px; }
+.progress-wrap { display:flex; flex-direction: column; gap:10px; }
+.progress-bar { background: rgba(0,0,0,0.06); height: 14px; border-radius: 12px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg,var(--groen), #2fbf7a); width: 0%; transition: width 400ms ease; }
+.progress-meta { display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:0.85rem; color:var(--tekst-licht); }
+.goal-input-wrap { display:flex; gap:8px; margin-top:8px; }
+.goal-input { padding:8px 10px; border-radius:10px; border:1px solid var(--rand); width:140px; }
+.goal-btn { background: var(--paars); border: none; padding:8px 12px; border-radius:10px; color:#fff; font-weight:700; cursor:pointer; }
+.goal-btn:hover { opacity:0.95; transform: translateY(-1px); }
 
 /* ── Item lijst (overzicht.html) ── */
 .item-lijst { list-style: none; }

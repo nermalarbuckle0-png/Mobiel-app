@@ -35,5 +35,22 @@
   "overzicht_totaal": "Totaal items",
   "overzicht_gemiddelde": "Gemiddelde waarde",
   "footer_tekst": "Mijn Gezondheid PWA — gebouwd met ❤️",
-  "lang_switch": "English"
+  "lang_switch": "English",
+  "calorie_teller": "Calorieën teller",
+  "daily_goals": "Dagelijkse doelen",
+  "goal_bewegen": "Bewegen (30 min)",
+  "goal_water": "Water (2L)",
+  "goal_slaap": "Slaap (8 uur)",
+  "stappen_label": "stappen",
+  "no_items": "Nog geen items — <a href=\"invoer.html\">voeg iets toe</a>!",
+  "meal_ontbijt": "Ontbijt",
+  "meal_lunch": "Lunch",
+  "meal_avond": "Avondeten",
+  "meal_snack": "Snack"
+  ,"steps_goal_label": "Stappen doel",
+  "set_goal": "Stel doel in",
+  "goal_placeholder": "bv. 10000",
+  "progress_of": "{current} van {goal} stappen",
+  "goal_reached": "Doel behaald!",
+  "goal_saved": "Doel opgeslagen"
 }

@@ -19,7 +19,7 @@
   "invoer_opslaan": "Save",
   "invoer_success": "✓ Saved!",
   "invoer_error": "Please fill in all required fields.",
-  "cat_voeding": "Nutrition",
+  "cat_voeding": "Nutrition", 
   "cat_sport": "Exercise",
   "cat_slaap": "Sleep",
   "cat_water": "Water",
@@ -35,5 +35,22 @@
   "overzicht_totaal": "Total entries",
   "overzicht_gemiddelde": "Average value",
   "footer_tekst": "My Health PWA — built with ❤️",
-  "lang_switch": "Nederlands"
+  "lang_switch": "Nederlands",
+  "calorie_teller": "Calories counter",
+  "daily_goals": "Daily goals",
+  "goal_bewegen": "Move (30 min)",
+  "goal_water": "Water (2L)",
+  "goal_slaap": "Sleep (8 hrs)",
+  "stappen_label": "steps",
+  "no_items": "No items yet — <a href=\"invoer.html\">add something</a>!",
+  "meal_ontbijt": "Breakfast",
+  "meal_lunch": "Lunch",
+  "meal_avond": "Dinner",
+  "meal_snack": "Snack"
+  ,"steps_goal_label": "Steps goal",
+  "set_goal": "Set goal",
+  "goal_placeholder": "e.g. 10000",
+  "progress_of": "{current} of {goal} steps",
+  "goal_reached": "Goal reached!",
+  "goal_saved": "Goal saved"
 }
