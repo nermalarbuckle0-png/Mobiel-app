@@ -198,16 +198,6 @@ function renderChart() {
   fill.setAttribute('points', `${points.join(' ')} ${width},60 0,60`);
 }
 
-function assetPath(file) {
-  const inPages = window.location.pathname.includes('/pages/');
-  return inPages ? `../${file}` : file;
-}
-
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register(assetPath('js/sw.js')).catch(() => {});
-  }
-}
 
 function pageLink(name) {
   const inPages = window.location.pathname.includes('/pages/');
@@ -333,7 +323,6 @@ function initPage() {
   updateProgress();
   renderChart();
   laadOverzicht();
-  registerServiceWorker();
 }
 
 document.addEventListener('DOMContentLoaded', initPage);
