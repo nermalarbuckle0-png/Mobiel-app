@@ -204,6 +204,14 @@ function registerServiceWorker() {
   }
 }
 
+function pageLink(name) {
+  const inPages = window.location.pathname.includes('/pages/');
+  if (name === 'home') {
+    return inPages ? '../index.html' : 'index.html';
+  }
+  return inPages ? `${name}.html` : `pages/${name}.html`;
+}
+
 function setupDrawer() {
   if (document.querySelector('.drawer')) return;
   const drawer = document.createElement('div');
@@ -212,9 +220,9 @@ function setupDrawer() {
     <div class="drawer-panel">
       <button class="drawer-close" aria-label="Close">✕</button>
       <nav>
-        <a href="index.html">Home</a>
-        <a href="invoer.html">Invoeren</a>
-        <a href="overzicht.html">Overzicht</a>
+        <a href="${pageLink('home')}">Home</a>
+        <a href="${pageLink('invoer')}">Invoeren</a>
+        <a href="${pageLink('overzicht')}">Overzicht</a>
       </nav>
     </div>`;
   document.body.appendChild(drawer);
