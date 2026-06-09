@@ -319,9 +319,15 @@ function setupToggleButtons() {
 
 let deferredPrompt = null;
 
+function isIos() {
+  return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+}
+
 function setupInstallButton() {
   const installBtn = document.getElementById('install-app');
   if (!installBtn) return;
+
+  installBtn.style.display = 'inline-flex';
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
@@ -330,12 +336,20 @@ function setupInstallButton() {
   });
 
   installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choiceResult = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    installBtn.style.display = 'none';
-    return choiceResult;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+      return choiceResult;
+    }
+
+    if (isIos()) {
+      alert('Safari ondersteunt geen automatische installatie. Gebruik de deelknop en kies "Zet in beginscherm" om de app toe te voegen.');
+      return;
+    }
+
+    alert('Deze browser ondersteunt geen directe installatie. Gebruik het browsermenu om "Toevoegen aan beginscherm" te kiezen.');
   });
 
   window.addEventListener('appinstalled', () => {
