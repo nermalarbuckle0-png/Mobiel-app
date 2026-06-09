@@ -1,17 +1,16 @@
 const CACHE = 'gezondheid-v1';
 
 const FILES = [
-  '/Mobiel-app/index.html',
-  '/Mobiel-app/pages/invoer.html',
-  '/Mobiel-app/pages/overzicht.html',
-  '/Mobiel-app/styles/style.css',
-  '/Mobiel-app/js/app.js',
-  '/Mobiel-app/json/nl.json',
-  '/Mobiel-app/json/en.json',
-  '/Mobiel-app/json/manifest.json',
-  '/Mobiel-app/icons/icon-192.png',
-  '/Mobiel-app/icons/icon-512.png',
-  '/Mobiel-app/icons/icon.svg'
+  '/index.html',
+  '/pages/invoer.html',
+  '/pages/overzicht.html',
+  '/styles/style.css',
+  '/js/app.js',
+  '/json/nl.json',
+  '/json/en.json',
+  '/json/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 // Sla bestanden op bij installatie
@@ -44,7 +43,7 @@ self.addEventListener('fetch', (e) => {
         return resp;
       }).catch(() => {
         // fallback to cached index for navigation requests
-        if (e.request.mode === 'navigate') return caches.match('/Mobiel-app/index.html');
+        if (e.request.mode === 'navigate') return caches.match('/index.html');
       });
     })
   );

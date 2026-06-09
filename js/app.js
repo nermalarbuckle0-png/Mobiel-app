@@ -198,6 +198,14 @@ function renderChart() {
   fill.setAttribute('points', `${points.join(' ')} ${width},60 0,60`);
 }
 
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/js/sw.js')
+      .then(registration => console.log('Service worker registered:', registration.scope))
+      .catch(error => console.warn('Service worker failed:', error));
+  }
+});
+
 
 function pageLink(name) {
   const inPages = window.location.pathname.includes('/pages/');
