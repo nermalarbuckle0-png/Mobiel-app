@@ -1,17 +1,17 @@
 const CACHE = 'gezondheid-v1';
 
 const FILES = [
-  '/pages/index.html',
-  '/pages/invoer.html',
-  '/pages/overzicht.html',
-  '/styles/style.css',
-  '/js/app.js',
-  '/json/nl.json',
-  '/json/en.json',
-  '/json/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon.svg'
+  '../index.html',
+  '../pages/invoer.html',
+  '../pages/overzicht.html',
+  '../styles/style.css',
+  'app.js',
+  '../json/nl.json',
+  '../json/en.json',
+  '../json/manifest.json',
+  '../icons/icon-192.png',
+  '../icons/icon-512.png',
+  '../icons/icon.svg'
 ];
 
 // Sla bestanden op bij installatie
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
         return resp;
       }).catch(() => {
         // fallback to cached index for navigation requests
-        if (e.request.mode === 'navigate') return caches.match('/pages/index.html');
+        if (e.request.mode === 'navigate') return caches.match('../index.html');
       });
     })
   );
