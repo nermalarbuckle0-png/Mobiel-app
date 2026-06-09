@@ -198,9 +198,14 @@ function renderChart() {
   fill.setAttribute('points', `${points.join(' ')} ${width},60 0,60`);
 }
 
+function assetPath(file) {
+  const inPages = window.location.pathname.includes('/pages/');
+  return inPages ? `../${file}` : file;
+}
+
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/js/sw.js').catch(() => {});
+    navigator.serviceWorker.register(assetPath('js/sw.js')).catch(() => {});
   }
 }
 
