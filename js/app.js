@@ -200,9 +200,15 @@ function renderChart() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
-    const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     const swUrl = window.location.pathname.includes('/pages/') ? '../js/sw.js' : 'js/sw.js';
-    navigator.serviceWorker.register(swUrl, { scope: basePath })
+    // Root scope bepalen: bijvoorbeeld /Mobiel-app/ voor zowel /Mobiel-app/ als /Mobiel-app/pages/
+    const pathname = window.location.pathname;
+    let rootScope = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+    if (pathname.includes('/pages/')) {
+      rootScope = pathname.substring(0, pathname.indexOf('/pages/') + 1);
+    }
+    
+    navigator.serviceWorker.register(swUrl, { scope: rootScope })
       .then(registration => console.log('Service worker registered:', registration.scope))
       .catch(error => console.warn('Service worker failed:', error));
   }

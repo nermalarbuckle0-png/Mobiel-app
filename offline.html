@@ -3,15 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline</title>
+  <title>App Offline</title>
   <link rel="stylesheet" href="styles/style.css">
+  <link rel="manifest" href="json/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2ecc71">
 </head>
 <body>
-  <main>
-    <h1>Je bent offline</h1>
-    <p>De app werkt nog steeds, maar je internetverbinding is momenteel niet beschikbaar.</p>
-    <p>Je kunt doorgaan met je vorige scherm of later opnieuw proberen.</p>
-    <p><a href="index.html">Terug naar start</a></p>
+  <header>
+    <span class="header-titel">Gezond Leven Tracker</span>
+  </header>
+  <main style="padding: 20px; text-align: center;">
+    <div style="margin-top: 40px;">
+      <h1 style="font-size: 2em; margin-bottom: 20px;">📶 Je bent offline</h1>
+      <p style="font-size: 1.1em; margin-bottom: 30px; color: #666;">
+        De app is beschikbaar in offline-modus. Je eerder opgeslagen gegevens zijn beschikbaar.
+      </p>
+      <div style="margin: 30px 0;">
+        <p style="margin: 10px 0;">✅ Je calorieën en voeding zijn opgeslagen</p>
+        <p style="margin: 10px 0;">✅ Je activiteiten worden onthouden</p>
+        <p style="margin: 10px 0;">✅ Alles werkt zonder internet</p>
+      </div>
+      <p style="font-size: 0.95em; color: #999; margin-top: 40px;">
+        Reconnect wanneer je internet terug hebt voor synchronisatie.
+      </p>
+    </div>
   </main>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="pages/invoer.html">Invoeren</a>
+    <a href="pages/overzicht.html">Overzicht</a>
+  </nav>
+  <script src="js/app.js"></script>
 </body>
 </html>
