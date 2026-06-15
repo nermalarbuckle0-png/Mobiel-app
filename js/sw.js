@@ -1,4 +1,5 @@
-const CACHE = 'gezondheid-v1';
+const CACHE = 'gezondheid-v2';
+// Bepaal basis-URL: /Mobiel-app/js/sw.js -> /Mobiel-app/
 const ROOT = self.location.pathname.replace(/\/js\/sw\.js$/, '/');
 const OFFLINE_URL = `${ROOT}offline.html`;
 
@@ -17,10 +18,16 @@ const FILES = [
 // Sla bestanden op bij installatie
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(FILES))
-      .catch(err => console.error('Cache install failed:', err))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache => {
+      // Voeg bestanden toe met fallback - mislukte requests stoppen niet de hele install
+      return Promise.all(
+        FILES.map(url =>
+          fetch(url)
+            .then(resp => resp.status === 200 ? cache.put(url, resp) : null)
+            .catch(err => console.warn(`Cache failed for ${url}:`, err))
+        )
+      ).then(() => self.skipWaiting());
+    })
   );
 });
 

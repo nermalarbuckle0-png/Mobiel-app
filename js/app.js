@@ -200,8 +200,9 @@ function renderChart() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
+    const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     const swUrl = window.location.pathname.includes('/pages/') ? '../js/sw.js' : 'js/sw.js';
-    navigator.serviceWorker.register(swUrl, { scope: '/' })
+    navigator.serviceWorker.register(swUrl, { scope: basePath })
       .then(registration => console.log('Service worker registered:', registration.scope))
       .catch(error => console.warn('Service worker failed:', error));
   }
