@@ -200,15 +200,9 @@ function renderChart() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
+    // GitHub Pages path: /Mobiel-app/
     const swUrl = window.location.pathname.includes('/pages/') ? '../js/sw.js' : 'js/sw.js';
-    // Root scope bepalen: bijvoorbeeld /Mobiel-app/ voor zowel /Mobiel-app/ als /Mobiel-app/pages/
-    const pathname = window.location.pathname;
-    let rootScope = pathname.substring(0, pathname.lastIndexOf('/') + 1);
-    if (pathname.includes('/pages/')) {
-      rootScope = pathname.substring(0, pathname.indexOf('/pages/') + 1);
-    }
-    
-    navigator.serviceWorker.register(swUrl, { scope: rootScope })
+    navigator.serviceWorker.register(swUrl, { scope: '/Mobiel-app/' })
       .then(registration => console.log('Service worker registered:', registration.scope))
       .catch(error => console.warn('Service worker failed:', error));
   }

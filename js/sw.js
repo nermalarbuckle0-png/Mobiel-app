@@ -1,8 +1,8 @@
-const CACHE = 'gezondheid-v2';
-// Bepaal basis-URL: /Mobiel-app/js/sw.js -> /Mobiel-app/
-const ROOT = self.location.pathname.replace(/\/js\/sw\.js$/, '/');
+const CACHE = 'gezondheid-v3';
+// ROOT berekenen: /Mobiel-app/js/sw.js -> /Mobiel-app/
+const pathname = self.location.pathname;
+const ROOT = pathname.substring(0, pathname.lastIndexOf('/js/sw.js')) + '/';
 const OFFLINE_URL = `${ROOT}offline.html`;
-const HOME_URL = `${ROOT}index.html`;
 
 const FILES = [
   `${ROOT}index.html`,
