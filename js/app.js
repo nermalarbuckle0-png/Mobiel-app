@@ -200,14 +200,13 @@ function renderChart() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
-    // GitHub Pages path: /Mobiel-app/
+    // Werkt zowel lokaal als op GitHub Pages
     const swUrl = window.location.pathname.includes('/pages/') ? '../js/sw.js' : 'js/sw.js';
-    navigator.serviceWorker.register(swUrl, { scope: '/Mobiel-app/' })
-      .then(registration => console.log('Service worker registered:', registration.scope))
-      .catch(error => console.warn('Service worker failed:', error));
+    navigator.serviceWorker.register(swUrl)
+      .then(reg => console.log('Service worker geregistreerd:', reg.scope))
+      .catch(err => console.warn('Service worker mislukt:', err));
   }
 });
-
 
 function pageLink(name) {
   const inPages = window.location.pathname.includes('/pages/');
@@ -316,7 +315,6 @@ function setupToggleButtons() {
     });
   });
 }
-
 
 function initPage() {
   const calorieElement = document.getElementById('calorie-waarde');
