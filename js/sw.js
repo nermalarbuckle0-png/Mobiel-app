@@ -1,8 +1,8 @@
-const CACHE = 'gezondheid-v4';
-const pathname = self.location.pathname;
-const ROOT = pathname.substring(0, pathname.lastIndexOf('/js/sw.js')) + '/';
+const CACHE = 'gezondheid-v5';
+const ROOT  = '/Mobiel-app/';
 const OFFLINE_URL = ROOT + 'offline.html';
 
+// Alle bestanden die offline beschikbaar moeten zijn
 const FILES = [
   ROOT,
   ROOT + 'index.html',
@@ -10,12 +10,16 @@ const FILES = [
   ROOT + 'pages/invoer.html',
   ROOT + 'pages/overzicht.html',
   ROOT + 'styles/style.css',
-  ROOT + 'js/app.js',
+  ROOT + 'js/data.js',
+  ROOT + 'js/ui.js',
   ROOT + 'json/nl.json',
   ROOT + 'json/en.json',
-  ROOT + 'json/manifest.json'
+  ROOT + 'json/manifest.json',
+  ROOT + 'icons/icon-192.png',
+  ROOT + 'icons/icon-512.png'
 ];
 
+// Installatie: cache alle bestanden
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE).then(cache =>
@@ -30,6 +34,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
+// Activatie: verwijder oude cache-versies
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -39,6 +44,7 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Fetch: geef cached versie terug, anders netwerk, anders offline-pagina
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
