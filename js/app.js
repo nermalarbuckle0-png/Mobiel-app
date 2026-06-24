@@ -1,68 +1,113 @@
 ﻿'use strict';
 
+/* ============================================================
+   OPSLAG — lezen en schrijven naar localStorage
+   ============================================================ */
+
+/** Haal de lijst van opgeslagen items op (altijd een array). */
 function getItems() {
   return JSON.parse(localStorage.getItem('items') || '[]');
 }
 
+/** Sla de volledige itemlijst op in localStorage. */
 function saveItems(items) {
   localStorage.setItem('items', JSON.stringify(items));
 }
 
-function tellerAanpassen(diff) {
-  const current = parseInt(localStorage.getItem('calorie') || '0', 10);
-  const next = Math.max(0, current + diff);
-  localStorage.setItem('calorie', next);
-  const el = document.getElementById('calorie-waarde');
-  if (el) el.textContent = next + ' kcal';
+/** Lees een getal uit localStorage, met een standaardwaarde als fallback. */
+function getStoredInt(key, defaultValue = 0) {
+  return parseInt(localStorage.getItem(key) || defaultValue, 10);
 }
 
+/* ============================================================
+   CALORIEËN — teller bijhouden
+   ============================================================ */
+
+/**
+ * Pas de calorieteller aan met een positieve of negatieve waarde.
+ * De teller gaat nooit onder nul.
+ */
+function tellerAanpassen(diff) {
+  const nieuw = Math.max(0, getStoredInt('calorie') + diff);
+  localStorage.setItem('calorie', nieuw);
+
+  const el = document.getElementById('calorie-waarde');
+  if (el) el.textContent = nieuw + ' kcal';
+}
+
+/* ============================================================
+   INVOER — nieuw item opslaan
+   ============================================================ */
+
+/** Sla een nieuw item op vanuit het invoerformulier. */
 function slaOp() {
   const omschrijvingEl = document.getElementById('invoer-omschrijving');
-  const calorieEl = document.getElementById('invoer-calorie');
-  const omschrijving = omschrijvingEl ? omschrijvingEl.value.trim() : '';
+  const calorieEl     = document.getElementById('invoer-calorie');
+  const omschrijving  = omschrijvingEl?.value.trim() ?? '';
+
   if (!omschrijving) {
     alert('Vul een omschrijving in.');
     return;
   }
 
+  // Bouw het nieuwe item op
   const item = {
-    id: Date.now(),
-    datum: new Date().toLocaleDateString('nl-NL'),
-    iso: new Date().toISOString(),
-    categorie: document.getElementById('invoer-categorie').value,
-    omschrijving: omschrijving,
-    calorie: calorieEl ? calorieEl.value : '',
-    maaltijd: document.getElementById('invoer-maaltijd').value,
+    id:           Date.now(),
+    datum:        new Date().toLocaleDateString('nl-NL'),
+    iso:          new Date().toISOString(),
+    categorie:    document.getElementById('invoer-categorie').value,
+    omschrijving,
+    calorie:      calorieEl?.value ?? '',
+    maaltijd:     document.getElementById('invoer-maaltijd').value,
   };
 
+  // Voeg toe aan het begin van de lijst (nieuwste bovenaan)
   const items = getItems();
   items.unshift(item);
   saveItems(items);
 
+  // Update calorieteller als er een waarde is ingevuld
   if (item.calorie) {
-    const current = parseInt(localStorage.getItem('calorie') || '0', 10);
-    localStorage.setItem('calorie', current + parseInt(item.calorie, 10));
+    const huidig = getStoredInt('calorie');
+    localStorage.setItem('calorie', huidig + parseInt(item.calorie, 10));
   }
 
+  // Formulier leegmaken
   if (omschrijvingEl) omschrijvingEl.value = '';
-  if (calorieEl) calorieEl.value = '';
+  if (calorieEl)      calorieEl.value = '';
 
-  const feedback = document.getElementById('succes-melding');
-  if (feedback) {
-    feedback.textContent = '✅ Opgeslagen!';
-    setTimeout(() => { feedback.textContent = ''; }, 2000);
-  }
+  // Toon een korte bevestiging
+  toonSuccesMelding();
 
+  // Vernieuw het overzicht als we daar al op staan
   if (window.location.pathname.endsWith('overzicht.html')) {
     laadOverzicht();
     renderChart();
   }
 }
 
+/** Toon de succesmelding 2 seconden lang. */
+function toonSuccesMelding() {
+  const feedback = document.getElementById('succes-melding');
+  if (!feedback) return;
+  feedback.textContent = '✅ Opgeslagen!';
+  setTimeout(() => { feedback.textContent = ''; }, 2000);
+}
+
+/* ============================================================
+   FILTERING — items filteren op tijdsperiode
+   ============================================================ */
+
+/**
+ * Bepaal of een item binnen de geselecteerde periode valt.
+ * @param {string} itemIso - ISO-datumstring van het item
+ * @param {string} periode - 'dag', 'week' of 'maand'
+ */
 function withinPeriod(itemIso, periode) {
   if (!itemIso) return false;
+
   const itemDate = new Date(itemIso);
-  const now = new Date();
+  const now      = new Date();
 
   if (periode === 'dag') {
     return itemDate.toDateString() === now.toDateString();
@@ -81,143 +126,222 @@ function withinPeriod(itemIso, periode) {
     return itemDate >= start && itemDate <= now;
   }
 
-  return true;
+  return true; // geen geldige periode → alles tonen
 }
 
+/** Geeft de actief geselecteerde periode terug ('dag', 'week' of 'maand'). */
+function getActievePeriode() {
+  return document.querySelector('.periode-tab.actief')?.dataset.periode || 'dag';
+}
+
+/* ============================================================
+   OVERZICHT — lijst renderen
+   ============================================================ */
+
+/** Emoji-iconen per categorie. */
+const CATEGORIE_ICONEN = {
+  voeding: '🍎',
+  sport:   '🏃',
+  slaap:   '😴',
+  water:   '💧',
+  gewicht: '⚖️',
+};
+
+/** Laad en render de itemlijst in het overzicht. */
 function laadOverzicht() {
   const lijst = document.getElementById('overzicht-lijst');
   if (!lijst) return;
 
-  const periode = document.querySelector('.periode-tab.actief')?.dataset.periode || 'dag';
-  const items = getItems().filter(item => withinPeriod(item.iso || item.datum, periode));
+  const periode = getActievePeriode();
+  const items   = getItems().filter(item => withinPeriod(item.iso || item.datum, periode));
 
   if (!items.length) {
     lijst.innerHTML = '<li class="leeg">Nog geen items — <a href="invoer.html">voeg iets toe</a>!</li>';
     return;
   }
 
-  const icons = { voeding: '🍎', sport: '🏃', slaap: '😴', water: '💧', gewicht: '⚖️' };
-
-  lijst.innerHTML = items.slice(0, 20).map(item => {
-    const meal = item.maaltijd || '';
-    const meta = item.datum + ' · ' + meal + (item.calorie ? ' · ' + item.calorie + ' kcal' : '');
-    return `
-      <li class="item-rij">
-        <span class="item-icoon">${icons[item.categorie] || '📝'}</span>
-        <div class="item-info">
-          <span class="item-naam">${item.omschrijving}</span>
-          <span class="item-meta">${meta}</span>
-        </div>
-        <button class="verwijder-knop" onclick="verwijderItem(${item.id})">✕</button>
-      </li>`;
-  }).join('');
+  lijst.innerHTML = items.slice(0, 20).map(maakItemRij).join('');
 }
 
+/**
+ * Genereer de HTML voor één item in de lijst.
+ * @param {Object} item
+ */
+function maakItemRij(item) {
+  const icoon = CATEGORIE_ICONEN[item.categorie] || '📝';
+  const meal  = item.maaltijd || '';
+  const meta  = [item.datum, meal, item.calorie ? item.calorie + ' kcal' : '']
+    .filter(Boolean)
+    .join(' · ');
+
+  return `
+    <li class="item-rij">
+      <span class="item-icoon">${icoon}</span>
+      <div class="item-info">
+        <span class="item-naam">${item.omschrijving}</span>
+        <span class="item-meta">${meta}</span>
+      </div>
+      <button class="verwijder-knop" onclick="verwijderItem(${item.id})">✕</button>
+    </li>`;
+}
+
+/** Verwijder een item op basis van id en vernieuw de weergave. */
 function verwijderItem(id) {
   saveItems(getItems().filter(item => item.id !== id));
   laadOverzicht();
   renderChart();
 }
 
+/* ============================================================
+   STAPPEN — voortgangsbalk
+   ============================================================ */
+
+/** Geeft het stappendoel op uit localStorage. */
 function getGoal() {
-  return parseInt(localStorage.getItem('stappen-doel') || '10000', 10);
+  return getStoredInt('stappen-doel', 10000);
 }
 
+/** Update de voortgangsbalk voor stappen. */
 function updateProgress() {
-  const current = parseInt(localStorage.getItem('stappen') || '0', 10);
-  const goal = getGoal();
+  const current = getStoredInt('stappen');
+  const goal    = getGoal();
+  const pct     = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0;
+
   const fill = document.getElementById('progress-fill');
   const text = document.getElementById('progress-text');
-  const pct = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0;
 
   if (fill) fill.style.width = pct + '%';
   if (text) {
-    text.textContent = pct >= 100 ? 'Doel behaald!' : `${current} van ${goal} stappen`;
+    text.textContent = pct >= 100
+      ? 'Doel behaald!'
+      : `${current} van ${goal} stappen`;
   }
 }
 
-function renderChart() {
-  const line = document.getElementById('chart-line');
-  const fill = document.getElementById('chart-fill');
-  if (!line || !fill) return;
+/* ============================================================
+   GRAFIEK — calorieverloop renderen
+   ============================================================ */
 
-  const periode = document.querySelector('.periode-tab.actief')?.dataset.periode || 'dag';
+/**
+ * Bouw buckets op voor de grafiek op basis van de periode.
+ * @param {string} periode - 'dag', 'week' of 'maand'
+ * @param {Array}  items
+ * @returns {number[]} Een array van caloriewaarden per bucket
+ */
+function buildChartBuckets(periode, items) {
   const now = new Date();
-  const items = getItems();
-  let buckets = [];
 
   if (periode === 'dag') {
-    buckets = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }));
+    // 24 buckets, één per uur
+    const buckets = Array(24).fill(0);
     items.forEach(item => {
       const date = new Date(item.iso || item.datum);
       if (date.toDateString() !== now.toDateString()) return;
-      const hour = date.getHours();
-      buckets[hour].value += parseInt(item.calorie || 0, 10) || 0;
+      buckets[date.getHours()] += parseInt(item.calorie || 0, 10) || 0;
     });
-  } else if (periode === 'week') {
-    buckets = Array.from({ length: 7 }, (_, index) => {
+    return buckets;
+  }
+
+  if (periode === 'week') {
+    // 7 buckets, één per dag (laatste 7 dagen)
+    const buckets = Array.from({ length: 7 }, (_, i) => {
       const day = new Date(now);
-      day.setDate(now.getDate() - (6 - index));
+      day.setDate(now.getDate() - (6 - i));
       day.setHours(0, 0, 0, 0);
       return { date: day, value: 0 };
     });
     items.forEach(item => {
       const date = new Date(item.iso || item.datum);
       buckets.forEach(bucket => {
-        const nextDay = new Date(bucket.date);
-        nextDay.setDate(bucket.date.getDate() + 1);
-        if (date >= bucket.date && date < nextDay) bucket.value += parseInt(item.calorie || 0, 10) || 0;
+        const next = new Date(bucket.date);
+        next.setDate(bucket.date.getDate() + 1);
+        if (date >= bucket.date && date < next) {
+          bucket.value += parseInt(item.calorie || 0, 10) || 0;
+        }
       });
     });
-  } else {
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    buckets = Array.from({ length: daysInMonth }, (_, index) => ({ date: new Date(now.getFullYear(), now.getMonth(), index + 1), value: 0 }));
-    items.forEach(item => {
-      const date = new Date(item.iso || item.datum);
-      buckets.forEach(bucket => {
-        const nextDay = new Date(bucket.date);
-        nextDay.setDate(bucket.date.getDate() + 1);
-        if (date >= bucket.date && date < nextDay) bucket.value += parseInt(item.calorie || 0, 10) || 0;
-      });
-    });
+    return buckets.map(b => b.value);
   }
 
-  const values = buckets.map(bucket => bucket.value);
-  const max = Math.max(...values, 1);
-  const width = 300;
-  const height = 60;
-  const step = values.length > 1 ? width / (values.length - 1) : width;
+  // Maand: één bucket per dag in de huidige maand
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const buckets = Array.from({ length: daysInMonth }, (_, i) => ({
+    date:  new Date(now.getFullYear(), now.getMonth(), i + 1),
+    value: 0,
+  }));
+  items.forEach(item => {
+    const date = new Date(item.iso || item.datum);
+    buckets.forEach(bucket => {
+      const next = new Date(bucket.date);
+      next.setDate(bucket.date.getDate() + 1);
+      if (date >= bucket.date && date < next) {
+        bucket.value += parseInt(item.calorie || 0, 10) || 0;
+      }
+    });
+  });
+  return buckets.map(b => b.value);
+}
 
-  const points = values.map((value, index) => {
-    const x = Math.round(index * step);
-    const y = Math.round(height - (value / max) * (height - 6));
+/** Render de SVG-lijnengrafiek voor calorieën. */
+function renderChart() {
+  const line = document.getElementById('chart-line');
+  const fill = document.getElementById('chart-fill');
+  if (!line || !fill) return;
+
+  const periode = getActievePeriode();
+  const values  = buildChartBuckets(periode, getItems());
+  const max     = Math.max(...values, 1);
+
+  const W    = 300;
+  const H    = 60;
+  const step = values.length > 1 ? W / (values.length - 1) : W;
+
+  // Bereken de x,y coördinaten per datapunt
+  const points = values.map((v, i) => {
+    const x = Math.round(i * step);
+    const y = Math.round(H - (v / max) * (H - 6));
     return `${x},${y}`;
   });
 
   line.setAttribute('points', points.join(' '));
-  fill.setAttribute('points', `${points.join(' ')} ${width},60 0,60`);
+  fill.setAttribute('points', `${points.join(' ')} ${W},${H} 0,${H}`);
 }
 
+/* ============================================================
+   SERVICE WORKER — PWA-ondersteuning
+   ============================================================ */
+
 window.addEventListener('load', () => {
-  if ('serviceWorker' in navigator) {
-    // Werkt zowel lokaal als op GitHub Pages
-    const swUrl = window.location.pathname.includes('/pages/') ? '../js/sw.js' : 'js/sw.js';
-    navigator.serviceWorker.register(swUrl)
-      .then(reg => console.log('Service worker geregistreerd:', reg.scope))
-      .catch(err => console.warn('Service worker mislukt:', err));
-  }
+  if (!('serviceWorker' in navigator)) return;
+
+  // Pad verschilt afhankelijk van of we in de /pages/ map zitten
+  const swUrl = window.location.pathname.includes('/pages/')
+    ? '../js/sw.js'
+    : 'js/sw.js';
+
+  navigator.serviceWorker.register(swUrl)
+    .then(reg => console.log('Service worker geregistreerd:', reg.scope))
+    .catch(err => console.warn('Service worker mislukt:', err));
 });
 
+/* ============================================================
+   NAVIGATIE — links en hamburgermenu
+   ============================================================ */
+
+/**
+ * Geeft het juiste pad naar een pagina terug,
+ * rekening houdend met de /pages/ submap.
+ */
 function pageLink(name) {
   const inPages = window.location.pathname.includes('/pages/');
-  if (name === 'home') {
-    return inPages ? '../index.html' : 'index.html';
-  }
+  if (name === 'home') return inPages ? '../index.html' : 'index.html';
   return inPages ? `${name}.html` : `pages/${name}.html`;
 }
 
+/** Maak het uitschuifmenu (drawer) aan en koppel de sluitknop. */
 function setupDrawer() {
-  if (document.querySelector('.drawer')) return;
+  if (document.querySelector('.drawer')) return; // Voorkom duplicaten
+
   const drawer = document.createElement('div');
   drawer.className = 'drawer';
   drawer.innerHTML = `
@@ -230,42 +354,53 @@ function setupDrawer() {
       </nav>
     </div>`;
   document.body.appendChild(drawer);
+
+  // Sluit drawer bij klik op de achtergrond of sluitknop
   drawer.addEventListener('click', e => {
-    if (e.target === drawer || e.target.classList.contains('drawer-close')) drawer.classList.remove('open');
+    if (e.target === drawer || e.target.classList.contains('drawer-close')) {
+      drawer.classList.remove('open');
+    }
   });
-  document.querySelectorAll('.menu-knop').forEach(btn => btn.addEventListener('click', () => drawer.classList.add('open')));
+
+  // Open drawer via alle hamburgerknopppen op de pagina
+  document.querySelectorAll('.menu-knop').forEach(btn =>
+    btn.addEventListener('click', () => drawer.classList.add('open'))
+  );
 }
 
+/* ============================================================
+   SETUP — interactieve elementen koppelen
+   ============================================================ */
+
+/** Koppel de knoppen voor het aanpassen van het stappendoel. */
 function setupGoalButtons() {
-  const goalChange = document.getElementById('goal-change');
+  const goalChange    = document.getElementById('goal-change');
   const goalInputWrap = document.getElementById('goal-input-wrap');
-  const goalInput = document.getElementById('goal-input');
-  const goalSave = document.getElementById('goal-save');
-  const goalCancel = document.getElementById('goal-cancel');
+  const goalInput     = document.getElementById('goal-input');
+  const goalSave      = document.getElementById('goal-save');
+  const goalCancel    = document.getElementById('goal-cancel');
 
-  if (goalChange) {
-    goalChange.addEventListener('click', () => {
-      if (!goalInputWrap) return;
-      goalInputWrap.style.display = goalInputWrap.style.display === 'flex' ? 'none' : 'flex';
-      if (goalInput) goalInput.value = localStorage.getItem('stappen-doel') || '10000';
-    });
-  }
+  goalChange?.addEventListener('click', () => {
+    if (!goalInputWrap) return;
+    const isOpen = goalInputWrap.style.display === 'flex';
+    goalInputWrap.style.display = isOpen ? 'none' : 'flex';
+    if (goalInput) goalInput.value = localStorage.getItem('stappen-doel') || '10000';
+  });
 
-  if (goalSave) {
-    goalSave.addEventListener('click', () => {
-      if (goalInput) localStorage.setItem('stappen-doel', Math.max(0, parseInt(goalInput.value, 10) || 0));
-      if (goalInputWrap) goalInputWrap.style.display = 'none';
-      updateProgress();
-    });
-  }
+  goalSave?.addEventListener('click', () => {
+    if (goalInput) {
+      localStorage.setItem('stappen-doel', Math.max(0, parseInt(goalInput.value, 10) || 0));
+    }
+    if (goalInputWrap) goalInputWrap.style.display = 'none';
+    updateProgress();
+  });
 
-  if (goalCancel) {
-    goalCancel.addEventListener('click', () => {
-      if (goalInputWrap) goalInputWrap.style.display = 'none';
-    });
-  }
+  goalCancel?.addEventListener('click', () => {
+    if (goalInputWrap) goalInputWrap.style.display = 'none';
+  });
 }
 
+/** Koppel de tabknoppen voor periodefiltering. */
 function setupPeriodTabs() {
   document.querySelectorAll('.periode-tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -277,17 +412,19 @@ function setupPeriodTabs() {
   });
 }
 
+/** Koppel de plus/min-knoppen voor het bijhouden van stappen. */
 function setupStepControls() {
-  const stappenEl = document.getElementById('stappen-waarde');
-  const stapPlus = document.getElementById('stappen-plus');
-  const stapMinus = document.getElementById('stappen-minus');
+  const stappenEl     = document.getElementById('stappen-waarde');
+  const stapPlus      = document.getElementById('stappen-plus');
+  const stapMinus     = document.getElementById('stappen-minus');
   const stappenToggle = document.getElementById('stappen-toggle');
 
+  // Toon het huidig aantal stappen
   if (stappenEl) {
-    const current = parseInt(localStorage.getItem('stappen') || '0', 10);
-    stappenEl.textContent = current + ' stappen';
+    stappenEl.textContent = getStoredInt('stappen') + ' stappen';
   }
 
+  // Sla de aan/uit-status van de stappenteller op
   if (stappenToggle) {
     stappenToggle.checked = localStorage.getItem('stappen-enabled') === 'true';
     stappenToggle.addEventListener('change', () => {
@@ -295,17 +432,19 @@ function setupStepControls() {
     });
   }
 
+  /** Pas het stappenaantal aan en update de UI. */
   function changeSteps(delta) {
-    const current = Math.max(0, parseInt(localStorage.getItem('stappen') || '0', 10) + delta);
-    localStorage.setItem('stappen', current);
-    if (stappenEl) stappenEl.textContent = current + ' stappen';
+    const nieuw = Math.max(0, getStoredInt('stappen') + delta);
+    localStorage.setItem('stappen', nieuw);
+    if (stappenEl) stappenEl.textContent = nieuw + ' stappen';
     updateProgress();
   }
 
-  if (stapPlus) stapPlus.addEventListener('click', () => changeSteps(100));
-  if (stapMinus) stapMinus.addEventListener('click', () => changeSteps(-100));
+  stapPlus?.addEventListener('click',  () => changeSteps(100));
+  stapMinus?.addEventListener('click', () => changeSteps(-100));
 }
 
+/** Koppel toggle-knoppen die hun staat opslaan in localStorage. */
 function setupToggleButtons() {
   document.querySelectorAll('[data-doel]').forEach(input => {
     const key = 'doel-' + input.dataset.doel;
@@ -316,11 +455,16 @@ function setupToggleButtons() {
   });
 }
 
+/* ============================================================
+   INITIALISATIE — pagina opstarten
+   ============================================================ */
+
+/** Initialiseer alle componenten zodra de DOM geladen is. */
 function initPage() {
+  // Toon opgeslagen caloriewaarde
   const calorieElement = document.getElementById('calorie-waarde');
   if (calorieElement) {
-    const current = parseInt(localStorage.getItem('calorie') || '0', 10);
-    calorieElement.textContent = current + ' kcal';
+    calorieElement.textContent = getStoredInt('calorie') + ' kcal';
   }
 
   setupDrawer();
