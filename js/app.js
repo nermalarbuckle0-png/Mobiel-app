@@ -50,7 +50,6 @@ function slaOp() {
     return;
   }
 
-  // Bouw het nieuwe item op
   const item = {
     id:           Date.now(),
     datum:        new Date().toLocaleDateString('nl-NL'),
@@ -61,25 +60,20 @@ function slaOp() {
     maaltijd:     document.getElementById('invoer-maaltijd').value,
   };
 
-  // Voeg toe aan het begin van de lijst (nieuwste bovenaan)
   const items = getItems();
   items.unshift(item);
   saveItems(items);
 
-  // Update calorieteller als er een waarde is ingevuld
   if (item.calorie) {
     const huidig = getStoredInt('calorie');
     localStorage.setItem('calorie', huidig + parseInt(item.calorie, 10));
   }
 
-  // Formulier leegmaken
   if (omschrijvingEl) omschrijvingEl.value = '';
   if (calorieEl)      calorieEl.value = '';
 
-  // Toon een korte bevestiging
   toonSuccesMelding();
 
-  // Vernieuw het overzicht als we daar al op staan
   if (window.location.pathname.endsWith('overzicht.html')) {
     laadOverzicht();
     renderChart();
@@ -126,7 +120,7 @@ function withinPeriod(itemIso, periode) {
     return itemDate >= start && itemDate <= now;
   }
 
-  return true; // geen geldige periode → alles tonen
+  return true;
 }
 
 /** Geeft de actief geselecteerde periode terug ('dag', 'week' of 'maand'). */
@@ -138,7 +132,6 @@ function getActievePeriode() {
    OVERZICHT — lijst renderen
    ============================================================ */
 
-/** Emoji-iconen per categorie. */
 const CATEGORIE_ICONEN = {
   voeding: '🍎',
   sport:   '🏃',
@@ -163,14 +156,9 @@ function laadOverzicht() {
   lijst.innerHTML = items.slice(0, 20).map(maakItemRij).join('');
 }
 
-/**
- * Genereer de HTML voor één item in de lijst.
- * @param {Object} item
- */
 function maakItemRij(item) {
   const icoon = CATEGORIE_ICONEN[item.categorie] || '📝';
-  const meal  = item.maaltijd || '';
-  const meta  = [item.datum, meal, item.calorie ? item.calorie + ' kcal' : '']
+  const meta  = [item.datum, item.maaltijd, item.calorie ? item.calorie + ' kcal' : '']
     .filter(Boolean)
     .join(' · ');
 
@@ -196,7 +184,6 @@ function verwijderItem(id) {
    STAPPEN — voortgangsbalk
    ============================================================ */
 
-/** Geeft het stappendoel op uit localStorage. */
 function getGoal() {
   return getStoredInt('stappen-doel', 10000);
 }
@@ -222,17 +209,10 @@ function updateProgress() {
    GRAFIEK — calorieverloop renderen
    ============================================================ */
 
-/**
- * Bouw buckets op voor de grafiek op basis van de periode.
- * @param {string} periode - 'dag', 'week' of 'maand'
- * @param {Array}  items
- * @returns {number[]} Een array van caloriewaarden per bucket
- */
 function buildChartBuckets(periode, items) {
   const now = new Date();
 
   if (periode === 'dag') {
-    // 24 buckets, één per uur
     const buckets = Array(24).fill(0);
     items.forEach(item => {
       const date = new Date(item.iso || item.datum);
@@ -243,7 +223,6 @@ function buildChartBuckets(periode, items) {
   }
 
   if (periode === 'week') {
-    // 7 buckets, één per dag (laatste 7 dagen)
     const buckets = Array.from({ length: 7 }, (_, i) => {
       const day = new Date(now);
       day.setDate(now.getDate() - (6 - i));
@@ -263,7 +242,6 @@ function buildChartBuckets(periode, items) {
     return buckets.map(b => b.value);
   }
 
-  // Maand: één bucket per dag in de huidige maand
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const buckets = Array.from({ length: daysInMonth }, (_, i) => ({
     date:  new Date(now.getFullYear(), now.getMonth(), i + 1),
@@ -296,7 +274,6 @@ function renderChart() {
   const H    = 60;
   const step = values.length > 1 ? W / (values.length - 1) : W;
 
-  // Bereken de x,y coördinaten per datapunt
   const points = values.map((v, i) => {
     const x = Math.round(i * step);
     const y = Math.round(H - (v / max) * (H - 6));
@@ -308,18 +285,18 @@ function renderChart() {
 }
 
 /* ============================================================
-   SERVICE WORKER — PWA-ondersteuning
+   SERVICE WORKER — PWA registratie
    ============================================================ */
 
 window.addEventListener('load', () => {
   if (!('serviceWorker' in navigator)) return;
 
-  // Pad verschilt afhankelijk van of we in de /pages/ map zitten
-  const swUrl = window.location.pathname.includes('/pages/')
-    ? '../js/sw.js'
-    : 'js/sw.js';
+  // Zoek de root van de site door terug te navigeren naar js/sw.js
+  // Werkt zowel vanuit index.html (root) als vanuit pages/*.html
+  const base = document.querySelector('base')?.href || window.location.origin + '/';
+  const swUrl = new URL('js/sw.js', base).href;
 
-  navigator.serviceWorker.register(swUrl)
+  navigator.serviceWorker.register(swUrl, { scope: new URL('./', base).href })
     .then(reg => console.log('Service worker geregistreerd:', reg.scope))
     .catch(err => console.warn('Service worker mislukt:', err));
 });
@@ -328,10 +305,6 @@ window.addEventListener('load', () => {
    NAVIGATIE — links en hamburgermenu
    ============================================================ */
 
-/**
- * Geeft het juiste pad naar een pagina terug,
- * rekening houdend met de /pages/ submap.
- */
 function pageLink(name) {
   const inPages = window.location.pathname.includes('/pages/');
   if (name === 'home') return inPages ? '../index.html' : 'index.html';
@@ -340,7 +313,7 @@ function pageLink(name) {
 
 /** Maak het uitschuifmenu (drawer) aan en koppel de sluitknop. */
 function setupDrawer() {
-  if (document.querySelector('.drawer')) return; // Voorkom duplicaten
+  if (document.querySelector('.drawer')) return;
 
   const drawer = document.createElement('div');
   drawer.className = 'drawer';
@@ -355,14 +328,12 @@ function setupDrawer() {
     </div>`;
   document.body.appendChild(drawer);
 
-  // Sluit drawer bij klik op de achtergrond of sluitknop
   drawer.addEventListener('click', e => {
     if (e.target === drawer || e.target.classList.contains('drawer-close')) {
       drawer.classList.remove('open');
     }
   });
 
-  // Open drawer via alle hamburgerknopppen op de pagina
   document.querySelectorAll('.menu-knop').forEach(btn =>
     btn.addEventListener('click', () => drawer.classList.add('open'))
   );
@@ -372,7 +343,6 @@ function setupDrawer() {
    SETUP — interactieve elementen koppelen
    ============================================================ */
 
-/** Koppel de knoppen voor het aanpassen van het stappendoel. */
 function setupGoalButtons() {
   const goalChange    = document.getElementById('goal-change');
   const goalInputWrap = document.getElementById('goal-input-wrap');
@@ -400,7 +370,6 @@ function setupGoalButtons() {
   });
 }
 
-/** Koppel de tabknoppen voor periodefiltering. */
 function setupPeriodTabs() {
   document.querySelectorAll('.periode-tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -412,19 +381,16 @@ function setupPeriodTabs() {
   });
 }
 
-/** Koppel de plus/min-knoppen voor het bijhouden van stappen. */
 function setupStepControls() {
   const stappenEl     = document.getElementById('stappen-waarde');
   const stapPlus      = document.getElementById('stappen-plus');
   const stapMinus     = document.getElementById('stappen-minus');
   const stappenToggle = document.getElementById('stappen-toggle');
 
-  // Toon het huidig aantal stappen
   if (stappenEl) {
     stappenEl.textContent = getStoredInt('stappen') + ' stappen';
   }
 
-  // Sla de aan/uit-status van de stappenteller op
   if (stappenToggle) {
     stappenToggle.checked = localStorage.getItem('stappen-enabled') === 'true';
     stappenToggle.addEventListener('change', () => {
@@ -432,7 +398,6 @@ function setupStepControls() {
     });
   }
 
-  /** Pas het stappenaantal aan en update de UI. */
   function changeSteps(delta) {
     const nieuw = Math.max(0, getStoredInt('stappen') + delta);
     localStorage.setItem('stappen', nieuw);
@@ -444,7 +409,6 @@ function setupStepControls() {
   stapMinus?.addEventListener('click', () => changeSteps(-100));
 }
 
-/** Koppel toggle-knoppen die hun staat opslaan in localStorage. */
 function setupToggleButtons() {
   document.querySelectorAll('[data-doel]').forEach(input => {
     const key = 'doel-' + input.dataset.doel;
@@ -459,9 +423,7 @@ function setupToggleButtons() {
    INITIALISATIE — pagina opstarten
    ============================================================ */
 
-/** Initialiseer alle componenten zodra de DOM geladen is. */
 function initPage() {
-  // Toon opgeslagen caloriewaarde
   const calorieElement = document.getElementById('calorie-waarde');
   if (calorieElement) {
     calorieElement.textContent = getStoredInt('calorie') + ' kcal';

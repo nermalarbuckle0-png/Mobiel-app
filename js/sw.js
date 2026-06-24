@@ -1,22 +1,16 @@
-const CACHE = 'gezondheid-v5';
-const ROOT  = '/Mobiel-app/';
-const OFFLINE_URL = ROOT + 'offline.html';
+const CACHE = 'gezondheid-v6';
+const OFFLINE_URL = 'offline.html';
 
 // Alle bestanden die offline beschikbaar moeten zijn
 const FILES = [
-  ROOT,
-  ROOT + 'index.html',
-  ROOT + 'offline.html',
-  ROOT + 'pages/invoer.html',
-  ROOT + 'pages/overzicht.html',
-  ROOT + 'styles/style.css',
-  ROOT + 'js/data.js',
-  ROOT + 'js/ui.js',
-  ROOT + 'json/nl.json',
-  ROOT + 'json/en.json',
-  ROOT + 'json/manifest.json',
-  ROOT + 'icons/icon-192.png',
-  ROOT + 'icons/icon-512.png'
+  './',
+  'index.html',
+  'offline.html',
+  'pages/invoer.html',
+  'pages/overzicht.html',
+  'styles/style.css',
+  'js/app.js',
+  'json/manifest.json'
 ];
 
 // Installatie: cache alle bestanden
